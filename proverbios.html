@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proverbio</title>
+  <link rel="icon" type="image/png" href="./logo.png">
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      background: #F5F5F7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 24px;
+    }
+
+    .tarjeta {
+      width: 100%;
+      max-width: 420px;
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 40px 36px;
+      text-align: center;
+      box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .etiqueta {
+      margin: 0 0 6px 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #86868b;
+    }
+
+    h1 {
+      margin: 0 0 22px 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .vista-previa {
+      background: #F5F5F7;
+      border-radius: 14px;
+      padding: 20px 18px;
+      margin-bottom: 26px;
+    }
+
+    .vista-previa blockquote {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #1d1d1f;
+    }
+
+    .vista-previa .referencia {
+      margin: 10px 0 0 0;
+      font-size: 13px;
+      color: #86868b;
+    }
+
+    .boton-principal {
+      width: 100%;
+      border: none;
+      background: #007AFF;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 14px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 122, 255, 0.28);
+      transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+
+    .boton-principal:hover:not(:disabled) {
+      background: #0066d6;
+    }
+
+    .boton-principal:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .boton-principal:disabled {
+      background: #d1d1d6;
+      color: #8e8e93;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .contador {
+      margin: 14px 0 0 0;
+      font-size: 13px;
+      color: #86868b;
+    }
+
+    .nota {
+      margin: 18px 0 0 0;
+      font-size: 12px;
+      color: #a1a1a6;
+    }
+
+    .aviso {
+      margin: 16px 0 0 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255, 59, 48, 0.08);
+      color: #d70015;
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="tarjeta">
+    <p class="etiqueta">Proverbio del día</p>
+    <h1>Proverbio Flotante</h1>
+
+    <div class="vista-previa">
+      <blockquote id="vista-previa-texto">Cargando…</blockquote>
+      <p class="referencia" id="vista-previa-ref"></p>
+    </div>
+
+    <button id="btn-abrir" class="boton-principal" type="button">Abrir proverbio flotante</button>
+    <p class="contador" id="contador"></p>
+
+    <p class="aviso" id="aviso-compatibilidad" hidden></p>
+  </main>
+
+  <script>
+    const PROVERBIOS = [
+      { texto: "Fíate de Jehová de todo tu corazón, Y no estribes en tu prudencia.", referencia: "Proverbios 3:5" },
+      { texto: "Reconócelo en todos tus caminos, Y él enderezará tus veredas.", referencia: "Proverbios 3:6" },
+      { texto: "No seas sabio en tu opinión: Teme á Jehová, y apártate del mal.", referencia: "Proverbios 3:7" },
+      { texto: "Honra á Jehová de tu sustancia, Y de las primicias de todos tus frutos.", referencia: "Proverbios 3:9" },
+      { texto: "No deseches, hijo mío, el castigo de Jehová; Ni te fatigues de su corrección.", referencia: "Proverbios 3:11" },
+      { texto: "Porque al que ama castiga, Como el padre al hijo á quien quiere.", referencia: "Proverbios 3:12" },
+      { texto: "Bienaventurado el hombre que halla la sabiduría, Y que obtiene la inteligencia.", referencia: "Proverbios 3:13" },
+      { texto: "Sus caminos son caminos deleitosos, Y todas sus veredas paz.", referencia: "Proverbios 3:17" },
+      { texto: "No detengas el bien de sus dueños, Cuando tuvieres poder para hacerlo.", referencia: "Proverbios 3:27" },
+      { texto: "No pleitees con alguno sin razón, Si él no te ha hecho agravio.", referencia: "Proverbios 3:30" },
+      { texto: "Ciertamente él escarnecerá á los escarnecedores, Y á los humildes dará gracia.", referencia: "Proverbios 3:34" },
+      { texto: "Los sabios heredarán honra: Mas los necios sostendrán ignominia.", referencia: "Proverbios 3:35" },
+      { texto: "El hijo sabio alegra al padre; Y el hijo necio es tristeza de su madre.", referencia: "Proverbios 10:1" },
+      { texto: "La mano negligente hace pobre: Mas la mano de los diligentes enriquece.", referencia: "Proverbios 10:4" },
+      { texto: "El que camina en integridad, anda confiado: Mas el que pervierte sus caminos, será quebrantado.", referencia: "Proverbios 10:9" },
+      { texto: "El odio despierta rencillas: Mas la caridad cubrirá todas las faltas.", referencia: "Proverbios 10:12" },
+      { texto: "Los sabios guardan la sabiduría: Mas la boca del loco es calamidad cercana.", referencia: "Proverbios 10:14" },
+      { texto: "Camino á la vida es guardar la corrección: Mas el que deja la reprensión, yerra.", referencia: "Proverbios 10:17" },
+      { texto: "En las muchas palabras no falta pecado: Mas el que refrena sus labios es prudente.", referencia: "Proverbios 10:19" },
+      { texto: "La bendición de Jehová es la que enriquece, Y no añade tristeza con ella.", referencia: "Proverbios 10:22" },
+      { texto: "El temor de Jehová aumentará los días: Mas los años de los impíos serán acortados.", referencia: "Proverbios 10:27" },
+      { texto: "La esperanza de los justos es alegría; Mas la esperanza de los impíos perecerá.", referencia: "Proverbios 10:28" },
+      { texto: "La boca del justo producirá sabiduría: Mas la lengua perversa será cortada.", referencia: "Proverbios 10:31" },
+      { texto: "El hijo sabio toma el consejo del padre: Mas el burlador no escucha las reprensiones.", referencia: "Proverbios 13:1" },
+      { texto: "El que guarda su boca guarda su alma: Mas el que mucho abre sus labios tendrá calamidad.", referencia: "Proverbios 13:3" },
+      { texto: "Desea, y nada alcanza el alma del perezoso: Mas el alma de los diligentes será engordada.", referencia: "Proverbios 13:4" },
+      { texto: "Hay quienes se hacen ricos, y no tienen nada: Y hay quienes se hacen pobres, y tienen muchas riquezas.", referencia: "Proverbios 13:7" },
+      { texto: "Ciertamente la soberbia parirá contienda: Mas con los avisados es la sabiduría.", referencia: "Proverbios 13:10" },
+      { texto: "La esperanza que se prolonga, es tormento del corazón: Mas árbol de vida es el deseo cumplido.", referencia: "Proverbios 13:12" },
+      { texto: "La ley del sabio es manantial de vida, Para apartarse de los lazos de la muerte.", referencia: "Proverbios 13:14" },
+      { texto: "El que anda con los sabios, sabio será; Mas el que se allega á los necios, será quebrantado.", referencia: "Proverbios 13:20" },
+      { texto: "El que detiene el castigo, á su hijo aborrece: Mas el que lo ama, madruga á castigarlo.", referencia: "Proverbios 13:24" },
+      { texto: "La blanda respuesta quita la ira: Mas la palabra áspera hace subir el furor.", referencia: "Proverbios 15:1" },
+      { texto: "Los ojos de Jehová están en todo lugar, Mirando á los malos y á los buenos.", referencia: "Proverbios 15:3" },
+      { texto: "El corazón alegre hermosea el rostro: Mas por el dolor de corazón el espíritu se abate.", referencia: "Proverbios 15:13" },
+      { texto: "Todos los días del afligido son trabajosos: Mas el de corazón contento tiene un convite continuo.", referencia: "Proverbios 15:15" },
+      { texto: "Mejor es lo poco con el temor de Jehová, Que el gran tesoro donde hay turbación.", referencia: "Proverbios 15:16" },
+      { texto: "Mejor es la comida de legumbres donde hay amor, Que de buey engordado donde hay odio.", referencia: "Proverbios 15:17" },
+      { texto: "Los pensamientos son frustrados donde no hay consejo; Mas en la multitud de consejeros se afirman.", referencia: "Proverbios 15:22" },
+      { texto: "Alégrase el hombre con la respuesta de su boca: Y la palabra á su tiempo, ¡cuán buena es!", referencia: "Proverbios 15:23" },
+      { texto: "La luz de los ojos alegra el corazón; Y la buena fama engorda los huesos.", referencia: "Proverbios 15:30" },
+      { texto: "El temor de Jehová es enseñanza de sabiduría: Y delante de la honra está la humildad.", referencia: "Proverbios 15:33" },
+      { texto: "Encomienda á Jehová tus obras, Y tus pensamientos serán afirmados.", referencia: "Proverbios 16:3" },
+      { texto: "El corazón del hombre piensa su camino: Mas Jehová endereza sus pasos.", referencia: "Proverbios 16:9" },
+      { texto: "Mejor es adquirir sabiduría que oro preciado; Y adquirir inteligencia vale más que la plata.", referencia: "Proverbios 16:16" },
+      { texto: "Antes del quebrantamiento es la soberbia; Y antes de la caída la altivez de espíritu.", referencia: "Proverbios 16:18" },
+      { texto: "Mejor es humillar el espíritu con los humildes, Que partir despojos con los soberbios.", referencia: "Proverbios 16:19" },
+      { texto: "El entendido en la palabra, hallará el bien: Y el que confía en Jehová, él es bienaventurado.", referencia: "Proverbios 16:20" },
+      { texto: "Panal de miel son los dichos suaves. Suavidad al alma y medicina á los huesos.", referencia: "Proverbios 16:24" },
+      { texto: "Hay camino que parece derecho al hombre, Mas su salida son caminos de muerte.", referencia: "Proverbios 16:25" },
+      { texto: "Corona de honra es la vejez, Que se hallará en el camino de justicia.", referencia: "Proverbios 16:31" },
+      { texto: "Mejor es el que tarde se aira que el fuerte; Y el que se enseñorea de su espíritu, que el que toma una ciudad.", referencia: "Proverbios 16:32" },
+      { texto: "Mejor es un bocado seco, y en paz, Que la casa de contienda llena de víctimas.", referencia: "Proverbios 17:1" },
+      { texto: "Corona de los viejos son los hijos de los hijos; Y la honra de los hijos, sus padres.", referencia: "Proverbios 17:6" },
+      { texto: "El que cubre la prevaricación, busca amistad: Mas el que reitera la palabra, aparta al amigo.", referencia: "Proverbios 17:9" },
+      { texto: "El que comienza la pendencia es como quien suelta las aguas: Deja pues la porfía, antes que se enmarañe.", referencia: "Proverbios 17:14" },
+      { texto: "En todo tiempo ama el amigo; Y el hermano para la angustia es nacido.", referencia: "Proverbios 17:17" },
+      { texto: "El corazón alegre produce buena disposición: Mas el espíritu triste seca los huesos.", referencia: "Proverbios 17:22" },
+      { texto: "Detiene sus dichos el que tiene sabiduría: De prudente espíritu es el hombre entendido.", referencia: "Proverbios 17:27" },
+      { texto: "Aun el necio cuando calla, es contado por sabio: El que cierra sus labios es entendido.", referencia: "Proverbios 17:28" },
+      { texto: "Aguas profundas son las palabras de la boca del hombre; Y arroyo revertiente, la fuente de la sabiduría.", referencia: "Proverbios 18:4" },
+      { texto: "También el que es negligente en su obra Es hermano del hombre disipador.", referencia: "Proverbios 18:9" },
+      { texto: "Torre fuerte es el nombre de Jehová: A él correrá el justo, y será levantado.", referencia: "Proverbios 18:10" },
+      { texto: "Antes del quebrantamiento se eleva el corazón del hombre, Y antes de la honra es el abatimiento.", referencia: "Proverbios 18:12" },
+      { texto: "El que responde palabra antes de oir, Le es fatuidad y oprobio.", referencia: "Proverbios 18:13" },
+      { texto: "El ánimo del hombre soportará su enfermedad: Mas ¿quién soportará al ánimo angustiado?", referencia: "Proverbios 18:14" },
+      { texto: "El corazón del entendido adquiere sabiduría; Y el oído de los sabios busca la ciencia.", referencia: "Proverbios 18:15" },
+      { texto: "El presente del hombre le ensancha el camino, Y le lleva delante de los grandes.", referencia: "Proverbios 18:16" },
+      { texto: "El hermano ofendido es más tenaz que una ciudad fuerte: Y las contiendas de los hermanos son como cerrojos de alcázar.", referencia: "Proverbios 18:19" },
+      { texto: "La muerte y la vida están en poder de la lengua; Y el que la ama comerá de sus frutos.", referencia: "Proverbios 18:21" },
+      { texto: "El que halló esposa halló el bien, Y alcanzó la benevolencia de Jehová.", referencia: "Proverbios 18:22" },
+      { texto: "El hombre que tiene amigos, ha de mostrarse amigo: Y amigo hay más conjunto que el hermano.", referencia: "Proverbios 18:24" },
+      { texto: "El vino es escarnecedor, la cerveza alborotadora; Y cualquiera que por ello errare, no será sabio.", referencia: "Proverbios 20:1" },
+      { texto: "Honra es del hombre dejarse de contienda: Mas todo insensato se envolverá en ella.", referencia: "Proverbios 20:3" },
+      { texto: "El perezoso no ara á causa del invierno; Pedirá pues en la siega, y no hallará.", referencia: "Proverbios 20:4" },
+      { texto: "Como aguas profundas es el consejo en el corazón del hombre: Mas el hombre entendido lo alcanzará.", referencia: "Proverbios 20:5" },
+      { texto: "Muchos hombres publican cada uno su liberalidad: Mas hombre de verdad, ¿quién lo hallará?", referencia: "Proverbios 20:6" },
+      { texto: "El justo que camina en su integridad, Bienaventurados serán sus hijos después de él.", referencia: "Proverbios 20:7" },
+      { texto: "¿Quién podrá decir: Yo he limpiado mi corazón, Limpio estoy de mi pecado?", referencia: "Proverbios 20:9" },
+      { texto: "Aun el muchacho es conocido por sus hechos, Si su obra fuere limpia y recta.", referencia: "Proverbios 20:11" },
+      { texto: "El oído que oye, y el ojo que ve, Ambas cosas ha igualmente hecho Jehová.", referencia: "Proverbios 20:12" },
+      { texto: "No ames el sueño, porque no te empobrezcas; Abre tus ojos, y te hartarás de pan.", referencia: "Proverbios 20:13" },
+      { texto: "El que descubre el secreto, en chismes anda: No te entrometas, pues, con el que lisonjea con sus labios.", referencia: "Proverbios 20:19" },
+      { texto: "No digas, yo me vengaré; Espera á Jehová, y él te salvará.", referencia: "Proverbios 20:22" },
+      { texto: "De Jehová son los pasos del hombre: ¿Cómo pues entenderá el hombre su camino?", referencia: "Proverbios 20:24" },
+      { texto: "Candela de Jehová es el alma del hombre, Que escudriña lo secreto del vientre.", referencia: "Proverbios 20:27" },
+      { texto: "La gloria de los jóvenes es su fortaleza, Y la hermosura de los viejos la vejez.", referencia: "Proverbios 20:29" },
+      { texto: "De más estima es la buena fama que las muchas riquezas; Y la buena gracia más que la plata y el oro.", referencia: "Proverbios 22:1" },
+      { texto: "El rico y el pobre se encontraron: A todos ellos hizo Jehová.", referencia: "Proverbios 22:2" },
+      { texto: "El avisado ve el mal, y escóndese: Mas los simples pasan, y reciben el daño.", referencia: "Proverbios 22:3" },
+      { texto: "Riquezas, y honra, y vida, Son la remuneración de la humildad y del temor de Jehová.", referencia: "Proverbios 22:4" },
+      { texto: "Instruye al niño en su carrera: Aun cuando fuere viejo no se apartará de ella.", referencia: "Proverbios 22:6" },
+      { texto: "El rico se enseñoreará de los pobres; Y el que toma prestado, siervo es del que empresta.", referencia: "Proverbios 22:7" },
+      { texto: "El ojo misericordioso será bendito, Porque dió de su pan al indigente.", referencia: "Proverbios 22:9" },
+      { texto: "El que ama la limpieza de corazón, Por la gracia de sus labios su amigo será el rey.", referencia: "Proverbios 22:11" },
+      { texto: "La necedad está ligada en el corazón del muchacho; Mas la vara de la corrección la hará alejar de él.", referencia: "Proverbios 22:15" },
+      { texto: "No robes al pobre, porque es pobre, Ni quebrantes en la puerta al afligido.", referencia: "Proverbios 22:22" },
+      { texto: "No te entrometas con el iracundo, Ni te acompañes con el hombre de enojos.", referencia: "Proverbios 22:24" },
+      { texto: "No traspases el término antiguo Que pusieron tus padres.", referencia: "Proverbios 22:28" },
+      { texto: "¿Has visto hombre solícito en su obra? delante de los reyes estará; No estará delante de los de baja suerte.", referencia: "Proverbios 22:29" },
+      { texto: "Mujer fuerte, ¿quién la hallará? Porque su estima sobrepuja largamente á la de piedras preciosas.", referencia: "Proverbios 31:10" },
+      { texto: "Fortaleza y honor son su vestidura; Y en el día postrero reirá.", referencia: "Proverbios 31:25" },
+      { texto: "Abrió su boca con sabiduría: Y la ley de clemencia está en su lengua.", referencia: "Proverbios 31:26" },
+      { texto: "Levantáronse sus hijos, y llamáronla bienaventurada; Y su marido también la alabó.", referencia: "Proverbios 31:28" },
+      { texto: "Engañosa es la gracia, y vana la hermosura: La mujer que teme á Jehová, ésa será alabada.", referencia: "Proverbios 31:30" }
+    ];
+
+    const CLAVE_ESTADO = "proverbio_flotante_estado_v1";
+    const UNA_HORA_MS = 60 * 60 * 1000;
+
+    function barajar(lista) {
+      const copia = lista.slice();
+      for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+      }
+      return copia;
+    }
+
+    function indicesCompletos() {
+      return PROVERBIOS.map((_, i) => i);
+    }
+
+    function crearEstadoInicial() {
+      const bolsa = barajar(indicesCompletos());
+      const indiceActual = bolsa.shift();
+      return {
+        indiceActual: indiceActual,
+        bolsa: bolsa,
+        proximoCambio: Date.now() + UNA_HORA_MS
+      };
+    }
+
+    function cargarEstado() {
+      try {
+        const guardado = sessionStorage.getItem(CLAVE_ESTADO);
+        if (!guardado) return crearEstadoInicial();
+        const datos = JSON.parse(guardado);
+        const esValido =
+          typeof datos.indiceActual === "number" &&
+          Array.isArray(datos.bolsa) &&
+          typeof datos.proximoCambio === "number" &&
+          datos.indiceActual >= 0 &&
+          datos.indiceActual < PROVERBIOS.length;
+        return esValido ? datos : crearEstadoInicial();
+      } catch (error) {
+        return crearEstadoInicial();
+      }
+    }
+
+    function guardarEstado() {
+      sessionStorage.setItem(CLAVE_ESTADO, JSON.stringify(estado));
+    }
+
+    let estado = cargarEstado();
+    guardarEstado();
+
+    function proverbioActual() {
+      return PROVERBIOS[estado.indiceActual];
+    }
+
+    function siguienteProverbio() {
+      if (estado.bolsa.length === 0) {
+        let nuevaBolsa = barajar(indicesCompletos()).filter(i => i !== estado.indiceActual);
+        estado.bolsa = nuevaBolsa.length > 0 ? nuevaBolsa : barajar(indicesCompletos());
+      }
+      estado.indiceActual = estado.bolsa.shift();
+      estado.proximoCambio = Date.now() + UNA_HORA_MS;
+      guardarEstado();
+      actualizarVistas();
+    }
+
+    const btnAbrir = document.getElementById("btn-abrir");
+    const vistaTexto = document.getElementById("vista-previa-texto");
+    const vistaRef = document.getElementById("vista-previa-ref");
+    const contadorEl = document.getElementById("contador");
+    const avisoCompat = document.getElementById("aviso-compatibilidad");
+
+    function actualizarVistaPrincipal() {
+      const p = proverbioActual();
+      vistaTexto.textContent = "\u201C" + p.texto + "\u201D";
+      vistaRef.textContent = p.referencia;
+    }
+
+    function actualizarContador() {
+      const restanteMs = Math.max(0, estado.proximoCambio - Date.now());
+      const minutos = Math.ceil(restanteMs / 60000);
+      if (restanteMs <= 0) {
+        contadorEl.textContent = "Actualizando…";
+      } else if (minutos <= 1) {
+        contadorEl.textContent = "Próximo proverbio en 1 min";
+      } else {
+        contadorEl.textContent = "Próximo proverbio en " + minutos + " min";
+      }
+    }
+
+    let ventanaPip = null;
+    let nodosPip = null;
+
+    function obtenerEstilosPip() {
+      return `
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #FFFFFF;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      .pip-contenedor {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.12);
+      }
+      .pip-texto {
+        margin: 0;
+        color: #1d1d1f;
+        font-size: 17px;
+        line-height: 1.5;
+        max-height: 150px;
+        overflow: hidden;
+      }
+      .pip-referencia {
+        margin: 12px 0 0 0;
+        color: #86868b;
+        font-size: 13px;
+      }
+      .pip-siguiente {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 122, 255, 0.10);
+        color: #007AFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+      }
+      .pip-siguiente:hover {
+        background: rgba(0, 122, 255, 0.18);
+        transform: scale(1.06);
+      }
+      .pip-siguiente:active {
+        transform: scale(0.94);
+      }
+    `;
+    }
+
+    function pintarProverbioEnPip() {
+      if (!nodosPip) return;
+      const p = proverbioActual();
+      nodosPip.texto.textContent = "\u201C" + p.texto + "\u201D";
+      nodosPip.referencia.textContent = p.referencia;
+    }
+
+    function construirContenidoPip(documentoPip) {
+      const contenedor = documentoPip.createElement("div");
+      contenedor.className = "pip-contenedor";
+
+      const parrafoTexto = documentoPip.createElement("p");
+      parrafoTexto.className = "pip-texto";
+
+      const parrafoRef = documentoPip.createElement("p");
+      parrafoRef.className = "pip-referencia";
+
+      const botonSiguiente = documentoPip.createElement("button");
+      botonSiguiente.type = "button";
+      botonSiguiente.className = "pip-siguiente";
+      botonSiguiente.setAttribute("aria-label", "Siguiente proverbio");
+      botonSiguiente.title = "Siguiente proverbio";
+      botonSiguiente.textContent = "→";
+      botonSiguiente.addEventListener("click", siguienteProverbio);
+
+      contenedor.appendChild(parrafoTexto);
+      contenedor.appendChild(parrafoRef);
+      contenedor.appendChild(botonSiguiente);
+      documentoPip.body.appendChild(contenedor);
+
+      nodosPip = { texto: parrafoTexto, referencia: parrafoRef };
+    }
+
+    function activarBotonPrincipal() {
+      btnAbrir.disabled = false;
+      btnAbrir.textContent = "Abrir proverbio flotante";
+    }
+
+    function desactivarBotonPrincipal() {
+      btnAbrir.disabled = true;
+      btnAbrir.textContent = "Proverbio flotante abierto";
+    }
+
+    async function abrirVentanaFlotante() {
+      if (!("documentPictureInPicture" in window)) return;
+
+      if (ventanaPip) {
+        ventanaPip.focus();
+        return;
+      }
+
+      desactivarBotonPrincipal();
+
+      try {
+        ventanaPip = await documentPictureInPicture.requestWindow({
+          width: 360,
+          height: 240
+        });
+      } catch (error) {
+        console.error("No se pudo abrir la ventana flotante:", error);
+        activarBotonPrincipal();
+        return;
+      }
+
+      const estiloInyectado = ventanaPip.document.createElement("style");
+      estiloInyectado.textContent = obtenerEstilosPip();
+      ventanaPip.document.head.appendChild(estiloInyectado);
+
+      construirContenidoPip(ventanaPip.document);
+      pintarProverbioEnPip();
+
+      ventanaPip.addEventListener(
+        "pagehide",
+        () => {
+          ventanaPip = null;
+          nodosPip = null;
+          activarBotonPrincipal();
+        },
+        { once: true }
+      );
+    }
+
+    function actualizarVistas() {
+      actualizarVistaPrincipal();
+      pintarProverbioEnPip();
+      actualizarContador();
+    }
+
+    setInterval(() => {
+      if (Date.now() >= estado.proximoCambio) {
+        siguienteProverbio();
+      } else {
+        actualizarContador();
+      }
+    }, 15000);
+
+    btnAbrir.addEventListener("click", abrirVentanaFlotante);
+
+    if (!("documentPictureInPicture" in window)) {
+      btnAbrir.disabled = true;
+      avisoCompat.hidden = false;
+      avisoCompat.textContent =
+        "Tu navegador no soporta la función \u201CImagen en imagen para documentos\u201D. " +
+        "Prueba a abrir esta página con la última versión de Chrome o Edge (116 o superior).";
+    }
+
+    actualizarVistas();
+  </script>
+</body>
+
+</html>
